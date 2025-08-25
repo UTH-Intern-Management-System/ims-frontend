@@ -93,9 +93,11 @@ const analyticsService = {
         inactiveInterns: totalInterns - activeInterns,
         departmentPerformance,
         gpaDistribution: gpaRanges,
-        averageGPA: mockUsers
-          .filter(u => u.role === "INTERN" && u.gpa)
-          .reduce((sum, intern) => sum + intern.gpa, 0) / mockUsers.filter(u => u.role === "INTERN" && u.gpa).length
+        averageGPA: (() => {
+          const internsWithGPA = mockUsers.filter(u => u.role === "INTERN" && u.gpa);
+          return internsWithGPA.length > 0 ? 
+            internsWithGPA.reduce((sum, intern) => sum + intern.gpa, 0) / internsWithGPA.length : 0;
+        })()
       }
     });
   },
@@ -123,7 +125,7 @@ const analyticsService = {
     });
     
     // Average progress
-    const averageProgress = mockTasks.reduce((sum, task) => sum + (task.progress || 0), 0) / totalTasks;
+    const averageProgress = totalTasks > 0 ? mockTasks.reduce((sum, task) => sum + (task.progress || 0), 0) / totalTasks : 0;
     
     return Promise.resolve({
       data: {
@@ -209,10 +211,10 @@ const analyticsService = {
         enrollmentByProgram,
         totalModules,
         averageModulesPerProgram,
-        averageProgramDuration: mockTrainingPrograms.reduce((sum, p) => {
+        averageProgramDuration: totalPrograms > 0 ? mockTrainingPrograms.reduce((sum, p) => {
           const duration = parseInt(p.duration.split(' ')[0]);
           return sum + duration;
-        }, 0) / totalPrograms
+        }, 0) / totalPrograms : 0
       }
     });
   },
