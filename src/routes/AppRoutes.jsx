@@ -3,6 +3,7 @@ import PrivateRoute from './PrivateRoute';
 
 // Auth
 import Login from '../pages/auth/Login';
+import Register from '../pages/auth/Register';
 
 // Common
 import NotFound from '../components/common/NotFound';
@@ -54,6 +55,7 @@ const AppRoutes = () => {
 
       {/* Public routes */}
       <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
 
       {/* Protected common routes */}
       <Route
