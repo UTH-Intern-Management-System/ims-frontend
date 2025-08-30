@@ -460,7 +460,7 @@ const InternProfiles = () => {
                       )}
                     </Box>
                     <Typography variant="caption" color="text.secondary">
-                      {intern.languages.join(', ')}
+                      {(intern.languages && Array.isArray(intern.languages)) ? intern.languages.join(', ') : ''}
                     </Typography>
                   </Box>
                 </TableCell>

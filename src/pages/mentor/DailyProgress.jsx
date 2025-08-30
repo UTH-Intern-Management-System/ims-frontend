@@ -48,12 +48,13 @@ const DailyProgress = () => {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   // Mock data for daily progress
+  const today = new Date().toISOString().split('T')[0];
   const mockProgressData = [
     {
       id: 1,
       internId: 9,
       internName: 'Software Dev Intern',
-      date: '2024-01-20',
+      date: today, // <-- đổi thành ngày hôm nay
       task: 'React Component Development',
       status: 'completed',
       progress: 100,
@@ -67,7 +68,7 @@ const DailyProgress = () => {
       id: 2,
       internId: 13,
       internName: 'UI/UX Design Intern',
-      date: '2024-01-20',
+      date: today, // <-- đổi thành ngày hôm nay
       task: 'User Research Survey',
       status: 'in-progress',
       progress: 75,
@@ -81,7 +82,7 @@ const DailyProgress = () => {
       id: 3,
       internId: 10,
       internName: 'Marketing Intern',
-      date: '2024-01-20',
+      date: today, // <-- đổi thành ngày hôm nay
       task: 'Content Calendar Creation',
       status: 'in-progress',
       progress: 60,
@@ -98,7 +99,7 @@ const DailyProgress = () => {
   }, [selectedDate]);
 
   const loadProgressData = () => {
-    // Filter data by selected date
+    // Filter data to mockProgressData by selected date
     const filteredData = mockProgressData.filter(item => 
       item.date === selectedDate.toISOString().split('T')[0]
     );
@@ -383,6 +384,13 @@ const ProgressForm = ({ mode, progress, onSubmit, onCancel }) => {
   };
 
   if (mode === 'view') {
+    if (!progress) {
+      return (
+        <Typography color="error" sx={{ p: 2 }}>
+          Không có dữ liệu tiến độ để hiển thị.
+        </Typography>
+      );
+    }
     return (
       <Box sx={{ pt: 2 }}>
         <Grid container spacing={2}>
