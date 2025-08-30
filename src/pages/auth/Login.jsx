@@ -193,6 +193,7 @@ const Login = () => {
                 mt: 3,
                 mb: 2,
                 py: 1.5,
+                color: "#fff",
                 borderRadius: 2,
                 fontSize: '1.1rem',
                 fontWeight: 'bold',
@@ -211,6 +212,28 @@ const Login = () => {
                 'Đăng nhập'
               )}
             </Button>
+          </Box>
+
+          {/* Sign Up Link */}
+          <Box sx={{ textAlign: 'center', mt: 2 }}>
+            <Typography variant="body2">
+              Chưa có tài khoản?{' '}
+              <Button
+                component="a"
+                href="/register"
+                color="primary"
+                sx={{
+                  textTransform: 'none',
+                  fontWeight: 'bold',
+                  '&:hover': {
+                    backgroundColor: 'transparent',
+                    textDecoration: 'underline',
+                  }
+                }}
+              >
+                Đăng ký ngay
+              </Button>
+            </Typography>
           </Box>
 
           {/* Footer */}
