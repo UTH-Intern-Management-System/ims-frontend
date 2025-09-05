@@ -41,10 +41,11 @@ import {
   LockOpen as UnlockIcon,
   Refresh as RefreshIcon
 } from '@mui/icons-material';
-import { useAuth } from '../../context/AuthContext';
+// import { useAuth } from '../../context/AuthContext';
+import { DeleteConfirmationDialog, StatusChangeConfirmationDialog } from '../../components/common/ConfirmationDialog';
 
 const UserManagement = () => {
-  const { user: currentUser } = useAuth();
+  // const { user: currentUser } = useAuth();
   const [users, setUsers] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -53,6 +54,8 @@ const UserManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [deleteDialog, setDeleteDialog] = useState({ open: false, user: null });
+  const [statusDialog, setStatusDialog] = useState({ open: false, user: null });
 
   // Enhanced mock data for user management
   const mockUsers = [
@@ -149,7 +152,7 @@ const UserManagement = () => {
   ];
 
   useEffect(() => {
-    setUsers(mockUsers);
+    setUsers([...mockUsers]);
   }, []);
 
   const handleOpenDialog = (mode, user = null) => {
@@ -186,20 +189,28 @@ const UserManagement = () => {
     handleCloseDialog();
   };
 
-  const handleDeleteUser = (userId) => {
-    if (window.confirm('Bạn có chắc muốn xóa người dùng này?')) {
-      const updatedUsers = users.filter(user => user.id !== userId);
-      setUsers(updatedUsers);
-      showSnackbar('Người dùng đã được xóa thành công!', 'success');
-    }
+  const handleDeleteUser = (user) => {
+    setDeleteDialog({ open: true, user });
   };
 
-  const handleToggleStatus = (userId) => {
+  const confirmDeleteUser = () => {
+    const updatedUsers = users.filter(user => user.id !== deleteDialog.user.id);
+    setUsers(updatedUsers);
+    showSnackbar('Người dùng đã được xóa thành công!', 'success');
+    setDeleteDialog({ open: false, user: null });
+  };
+
+  const handleToggleStatus = (user) => {
+    setStatusDialog({ open: true, user });
+  };
+
+  const confirmToggleStatus = () => {
     const updatedUsers = users.map(user => 
-      user.id === userId ? { ...user, status: user.status === 'active' ? 'inactive' : 'active' } : user
+      user.id === statusDialog.user.id ? { ...user, status: user.status === 'active' ? 'inactive' : 'active' } : user
     );
     setUsers(updatedUsers);
     showSnackbar('Trạng thái người dùng đã được cập nhật!', 'success');
+    setStatusDialog({ open: false, user: null });
   };
 
   const handleToggleTwoFactor = (userId) => {
@@ -535,7 +546,7 @@ const UserManagement = () => {
                       <IconButton
                         size="small"
                         color={user.status === 'active' ? 'warning' : 'success'}
-                        onClick={() => handleToggleStatus(user.id)}
+                        onClick={() => handleToggleStatus(user)}
                       >
                         {user.status === 'active' ? <BlockIcon /> : <CheckCircleIcon />}
                       </IconButton>
@@ -554,7 +565,7 @@ const UserManagement = () => {
                         <IconButton
                           size="small"
                           color="error"
-                          onClick={() => handleDeleteUser(user.id)}
+                          onClick={() => handleDeleteUser(user)}
                         >
                           <DeleteIcon />
                         </IconButton>
@@ -583,6 +594,32 @@ const UserManagement = () => {
           />
         </DialogContent>
       </Dialog>
+
+      {/* Confirmation Dialogs */}
+      <DeleteConfirmationDialog
+        open={deleteDialog.open}
+        onClose={() => setDeleteDialog({ open: false, user: null })}
+        onConfirm={confirmDeleteUser}
+        itemName={deleteDialog.user?.name}
+        itemType="người dùng"
+      />
+
+      <StatusChangeConfirmationDialog
+        open={statusDialog.open}
+        onClose={() => setStatusDialog({ open: false, user: null })}
+        onConfirm={confirmToggleStatus}
+        currentStatus={statusDialog.user?.status === 'active' ? 'Hoạt động' : 'Không hoạt động'}
+        newStatus={statusDialog.user?.status === 'active' ? 'Không hoạt động' : 'Hoạt động'}
+        itemName={statusDialog.user?.name}
+        consequences={statusDialog.user?.status === 'active' ? [
+          'Người dùng sẽ không thể đăng nhập vào hệ thống',
+          'Tất cả phiên đăng nhập hiện tại sẽ bị hủy',
+          'Quyền truy cập vào các tính năng sẽ bị tạm ngưng'
+        ] : [
+          'Người dùng sẽ có thể đăng nhập trở lại',
+          'Quyền truy cập sẽ được khôi phục theo vai trò'
+        ]}
+      />
 
       {/* Snackbar */}
       <Snackbar
@@ -619,6 +656,16 @@ const UserForm = ({ mode, user, onSubmit, onClose }) => {
   };
 
   if (mode === 'view') {
+    if (!user) {
+      return (
+        <Box sx={{ pt: 2, textAlign: 'center' }}>
+          <Typography variant="h6" color="text.secondary">
+            Không có dữ liệu người dùng
+          </Typography>
+        </Box>
+      );
+    }
+
     return (
       <Box sx={{ pt: 2 }}>
         <Grid container spacing={2}>

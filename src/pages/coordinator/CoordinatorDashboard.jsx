@@ -13,21 +13,21 @@ const CoordinatorDashboard = () => {
       title: 'Lịch phỏng vấn', 
       description: 'Quản lý lịch phỏng vấn', 
       icon: <CalendarMonth />, 
-      path: '/coordinator/interview-schedule',
+      path: '/coordinator/interviews',
       color: 'primary.main'
     },
     { 
       title: 'Theo dõi hiệu suất', 
       description: 'Đánh giá tiến độ thực tập', 
       icon: <TrendingUp />, 
-      path: '/coordinator/performance-tracking',
+      path: '/coordinator/performance',
       color: 'success.main'
     },
     { 
       title: 'Chương trình đào tạo', 
       description: 'Quản lý khóa học', 
       icon: <School />, 
-      path: '/coordinator/training-programs',
+      path: '/coordinator/training',
       color: 'warning.main'
     }
   ];

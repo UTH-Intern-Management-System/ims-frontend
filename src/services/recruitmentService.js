@@ -34,9 +34,9 @@ const recruitmentService = {
   },
   
   deleteCampaign: (id) => {
-    const initialLength = mockRecruitmentCampaigns.length;
-    const filtered = mockRecruitmentCampaigns.filter(campaign => campaign.id !== id);
-    if (filtered.length < initialLength) {
+    const index = mockRecruitmentCampaigns.findIndex(campaign => campaign.id === id);
+    if (index > -1) {
+      mockRecruitmentCampaigns.splice(index, 1);
       return Promise.resolve({ success: true });
     }
     return Promise.reject(new Error("Campaign not found"));

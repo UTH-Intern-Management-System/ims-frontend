@@ -1,4 +1,39 @@
-# Getting Started with Create React App
+# Intern Management System (IMS)
+
+## 🎯 **Hệ thống quản lý thực tập sinh cho doanh nghiệp**
+
+Intern Management System (IMS) là một nền tảng cloud-based tiên tiến được thiết kế để tối ưu hóa toàn bộ vòng đời quản lý thực tập sinh. Hệ thống hỗ trợ lập lịch, chương trình đào tạo tùy chỉnh, theo dõi hiệu suất thời gian thực và phân tích toàn diện.
+
+## 🚀 **Tính năng chính**
+
+### 👥 **Đa vai trò người dùng:**
+- **HR Managers**: Quản lý tuyển dụng, hồ sơ thực tập sinh, báo cáo và phân tích
+- **Internship Coordinators**: Lập lịch phỏng vấn, thiết lập chương trình đào tạo, theo dõi hiệu suất
+- **Mentors**: Theo dõi tiến độ hàng ngày, đánh giá kỹ năng, công cụ giao tiếp
+- **Interns**: Dashboard cá nhân, gửi phản hồi, theo dõi phát triển kỹ năng
+- **Admin**: Cấu hình hệ thống, quản lý người dùng, hỗ trợ kỹ thuật
+
+### 🔥 **Tính năng nâng cao:**
+- ✅ Real-time notifications với WebSocket
+- ✅ Advanced search với AI suggestions  
+- ✅ Automated email/SMS reminders
+- ✅ Performance optimization
+- ✅ Enterprise-grade security
+- ✅ Mobile responsive design
+- ✅ Rich text editor với mentions
+- ✅ Data export capabilities
+- ✅ File upload với validation
+
+## 🛠 **Tech Stack**
+
+- **Frontend**: React 18, Material-UI (MUI)
+- **State Management**: React Context API
+- **Routing**: React Router v6
+- **Charts**: Recharts
+- **Date Handling**: dayjs
+- **Notifications**: react-hot-toast
+- **Security**: DOMPurify, CSRF protection
+- **Performance**: Lazy loading, Code splitting, Memoization
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 

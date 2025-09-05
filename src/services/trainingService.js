@@ -39,9 +39,9 @@ const trainingService = {
   },
   
   deleteProgram: (id) => {
-    const initialLength = mockTrainingPrograms.length;
-    const filtered = mockTrainingPrograms.filter(program => program.id !== id);
-    if (filtered.length < initialLength) {
+    const index = mockTrainingPrograms.findIndex(program => program.id === id);
+    if (index > -1) {
+      mockTrainingPrograms.splice(index, 1);
       return Promise.resolve({ success: true });
     }
     return Promise.reject(new Error("Training program not found"));

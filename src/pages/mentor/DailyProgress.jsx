@@ -31,6 +31,7 @@ import {
 import { 
   Add as AddIcon, 
   Edit as EditIcon, 
+  Delete as DeleteIcon,
   CheckCircle as CheckCircleIcon,
   Warning as WarningIcon,
   TrendingUp as TrendingUpIcon,
@@ -136,6 +137,14 @@ const DailyProgress = () => {
       showSnackbar('Tiến độ đã được cập nhật thành công!', 'success');
     }
     handleCloseDialog();
+  };
+
+  const handleDelete = (progressId) => {
+    if (window.confirm('Bạn có chắc muốn xóa tiến độ này không?')) {
+      const updatedData = progressData.filter(item => item.id !== progressId);
+      setProgressData(updatedData);
+      showSnackbar('Tiến độ đã được xóa thành công!', 'success');
+    }
   };
 
   const showSnackbar = (message, severity) => {
@@ -316,9 +325,19 @@ const DailyProgress = () => {
                     <Tooltip title="Chỉnh sửa">
                       <IconButton
                         size="small"
+                        color="primary"
                         onClick={() => handleOpenDialog('edit', progress)}
                       >
                         <EditIcon />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Xóa">
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={() => handleDelete(progress.id)}
+                      >
+                        <DeleteIcon />
                       </IconButton>
                     </Tooltip>
                   </Box>

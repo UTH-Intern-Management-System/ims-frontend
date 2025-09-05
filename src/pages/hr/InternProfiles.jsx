@@ -124,7 +124,7 @@ const InternProfiles = () => {
   const handleDeleteIntern = async (internId) => {
     if (window.confirm('Bạn có chắc muốn xóa hồ sơ này?')) {
       try {
-        await internService.delete(internId);
+        await internService.remove(internId);
         showSnackbar('Hồ sơ thực tập sinh đã được xóa thành công!', 'success');
         await loadInterns(); // Reload data
       } catch (error) {
@@ -570,6 +570,16 @@ const InternForm = ({ mode, intern, onSubmit, onClose }) => {
   };
 
   if (mode === 'view') {
+    if (!intern) {
+      return (
+        <Box sx={{ pt: 2, textAlign: 'center' }}>
+          <Typography variant="h6" color="text.secondary">
+            Không có dữ liệu thực tập sinh
+          </Typography>
+        </Box>
+      );
+    }
+
     return (
       <Box sx={{ pt: 2 }}>
         <Grid container spacing={3}>
@@ -578,19 +588,19 @@ const InternForm = ({ mode, intern, onSubmit, onClose }) => {
             <List dense>
               <ListItem>
                 <ListItemIcon><PersonIcon /></ListItemIcon>
-                <ListItemText primary="Họ tên" secondary={intern.name} />
+                <ListItemText primary="Họ tên" secondary={intern?.name || 'Chưa có thông tin'} />
               </ListItem>
               <ListItem>
                 <ListItemIcon><EmailIcon /></ListItemIcon>
-                <ListItemText primary="Email" secondary={intern.email} />
+                <ListItemText primary="Email" secondary={intern?.email || 'Chưa có thông tin'} />
               </ListItem>
               <ListItem>
                 <ListItemIcon><PhoneIcon /></ListItemIcon>
-                <ListItemText primary="Số điện thoại" secondary={intern.phone} />
+                <ListItemText primary="Số điện thoại" secondary={intern?.phone || 'Chưa có thông tin'} />
               </ListItem>
               <ListItem>
                 <ListItemIcon><LocationIcon /></ListItemIcon>
-                <ListItemText primary="Địa chỉ" secondary={intern.address} />
+                <ListItemText primary="Địa chỉ" secondary={intern?.address || 'Chưa có thông tin'} />
               </ListItem>
             </List>
           </Grid>
@@ -600,19 +610,19 @@ const InternForm = ({ mode, intern, onSubmit, onClose }) => {
             <List dense>
               <ListItem>
                 <ListItemIcon><SchoolIcon /></ListItemIcon>
-                <ListItemText primary="Trường đại học" secondary={intern.university} />
+                <ListItemText primary="Trường đại học" secondary={intern?.university || 'Chưa có thông tin'} />
               </ListItem>
               <ListItem>
                 <ListItemIcon><WorkIcon /></ListItemIcon>
-                <ListItemText primary="Chuyên ngành" secondary={intern.major} />
+                <ListItemText primary="Chuyên ngành" secondary={intern?.major || 'Chưa có thông tin'} />
               </ListItem>
               <ListItem>
                 <ListItemIcon><CalendarIcon /></ListItemIcon>
-                <ListItemText primary="Năm học" secondary={`Năm ${intern.year}`} />
+                <ListItemText primary="Năm học" secondary={intern?.year ? `Năm ${intern.year}` : 'Chưa có thông tin'} />
               </ListItem>
               <ListItem>
                 <ListItemIcon><PersonIcon /></ListItemIcon>
-                <ListItemText primary="GPA" secondary={intern.gpa} />
+                <ListItemText primary="GPA" secondary={intern?.gpa || 'Chưa có thông tin'} />
               </ListItem>
             </List>
           </Grid>
@@ -620,19 +630,21 @@ const InternForm = ({ mode, intern, onSubmit, onClose }) => {
           <Grid item xs={12}>
             <Typography variant="h6" gutterBottom>Kỹ năng & Ngôn ngữ</Typography>
             <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
-              {intern.skills.map((skill, index) => (
+              {(intern?.skills && Array.isArray(intern.skills)) ? intern.skills.map((skill, index) => (
                 <Chip key={index} label={skill} color="primary" variant="outlined" />
-              ))}
+              )) : (
+                <Typography variant="body2" color="text.secondary">Chưa có kỹ năng</Typography>
+              )}
             </Box>
             <Typography variant="body2" color="text.secondary">
-              Ngôn ngữ: {intern.languages.join(', ')}
+              Ngôn ngữ: {(intern?.languages && Array.isArray(intern.languages)) ? intern.languages.join(', ') : 'Chưa có thông tin'}
             </Typography>
           </Grid>
           
           <Grid item xs={12}>
             <Typography variant="h6" gutterBottom>Ghi chú</Typography>
             <Typography variant="body2" color="text.secondary">
-              {intern.notes}
+              {intern?.notes || 'Chưa có ghi chú'}
             </Typography>
           </Grid>
         </Grid>
