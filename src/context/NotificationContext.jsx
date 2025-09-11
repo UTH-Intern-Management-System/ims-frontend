@@ -1,32 +1,8 @@
 import React, { createContext, useState, useCallback, useEffect } from 'react';
-import { 
-  Snackbar, 
-  Alert, 
-  Badge, 
-  IconButton, 
-  Drawer, 
-  List, 
-  ListItem, 
-  ListItemText, 
-  ListItemIcon,
-  Typography,
-  Box,
-  Chip,
-  Button,
-  Divider,
-  Avatar
-} from '@mui/material';
 import {
-  Notifications as NotificationsIcon,
-  Close as CloseIcon,
-  MarkEmailRead as MarkReadIcon,
-  Delete as DeleteIcon,
-  Info as InfoIcon,
-  Warning as WarningIcon,
-  Error as ErrorIcon,
-  CheckCircle as SuccessIcon
-} from '@mui/icons-material';
-// Note: Install date-fns if not already installed: npm install date-fns
+  Snackbar,
+  Alert
+} from '@mui/material';
 
 export const NotificationContext = createContext();
 
@@ -40,7 +16,6 @@ export const NotificationProvider = ({ children }) => {
   });
   
   const [notifications, setNotifications] = useState([]);
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
 
   // Load notifications from localStorage on mount
@@ -60,6 +35,7 @@ export const NotificationProvider = ({ children }) => {
 
   const showNotification = useCallback((message, severity = 'success', options = {}) => {
     const id = Date.now() + Math.random();
+    
     const newNotification = {
       id,
       message,
@@ -79,12 +55,12 @@ export const NotificationProvider = ({ children }) => {
     setUnreadCount(prev => prev + 1);
 
     // Show snackbar
-    setNotification({ 
-      open: true, 
-      message, 
+    setNotification({
+      open: true,
+      message,
       severity,
-      action: options.action,
-      persistent: options.persistent
+      action: options.action || null,
+      persistent: options.persistent || false
     });
 
     // Auto-hide if not persistent
@@ -109,8 +85,15 @@ export const NotificationProvider = ({ children }) => {
   const showInfo = useCallback((message, options) => 
     showNotification(message, 'info', options), [showNotification]);
 
-  const handleClose = () => {
+  const clearNotification = () => {
     setNotification(prev => ({ ...prev, open: false }));
+  };
+
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    clearNotification();
   };
 
   const markAsRead = useCallback((id) => {
@@ -135,14 +118,12 @@ export const NotificationProvider = ({ children }) => {
 
   const deleteNotification = useCallback((id) => {
     setNotifications(prev => {
-      const notification = prev.find(n => n.id === id);
       const updated = prev.filter(n => n.id !== id);
       saveNotifications(updated);
-      
-      if (notification && !notification.read) {
+      const wasUnread = prev.find(n => n.id === id && !n.read);
+      if (wasUnread) {
         setUnreadCount(count => Math.max(0, count - 1));
       }
-      
       return updated;
     });
   }, [saveNotifications]);
@@ -150,59 +131,26 @@ export const NotificationProvider = ({ children }) => {
   const clearAllNotifications = useCallback(() => {
     setNotifications([]);
     setUnreadCount(0);
-    localStorage.removeItem('notifications');
-  }, []);
-
-  const getIcon = (severity) => {
-    switch (severity) {
-      case 'success': return <SuccessIcon />;
-      case 'error': return <ErrorIcon />;
-      case 'warning': return <WarningIcon />;
-      case 'info': return <InfoIcon />;
-      default: return <InfoIcon />;
-    }
-  };
-
-  const getSeverityColor = (severity) => {
-    switch (severity) {
-      case 'success': return 'success';
-      case 'error': return 'error';
-      case 'warning': return 'warning';
-      case 'info': return 'info';
-      default: return 'default';
-    }
-  };
+    saveNotifications([]);
+  }, [saveNotifications]);
 
   return (
-    <NotificationContext.Provider value={{ 
+    <NotificationContext.Provider value={{
       showNotification,
       showSuccess,
       showError,
       showWarning,
       showInfo,
-      notifications,
-      unreadCount,
+      clearNotification,
       markAsRead,
       markAllAsRead,
       deleteNotification,
       clearAllNotifications,
-      openDrawer: () => setDrawerOpen(true)
+      notifications,
+      unreadCount
     }}>
       {children}
       
-      {/* Notification Bell Icon */}
-      <Box sx={{ position: 'fixed', top: 16, right: 80, zIndex: 1300 }}>
-        <IconButton 
-          color="inherit" 
-          onClick={() => setDrawerOpen(true)}
-          sx={{ color: 'text.primary' }}
-        >
-          <Badge badgeContent={unreadCount} color="error">
-            <NotificationsIcon />
-          </Badge>
-        </IconButton>
-      </Box>
-
       {/* Snackbar for immediate notifications */}
       <Snackbar
         open={notification.open}
@@ -220,134 +168,6 @@ export const NotificationProvider = ({ children }) => {
           {notification.message}
         </Alert>
       </Snackbar>
-
-      {/* Notifications Drawer */}
-      <Drawer
-        anchor="right"
-        open={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-        sx={{
-          '& .MuiDrawer-paper': {
-            width: 400,
-            maxWidth: '90vw'
-          }
-        }}
-      >
-        <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-            <Typography variant="h6">Thông báo</Typography>
-            <IconButton onClick={() => setDrawerOpen(false)}>
-              <CloseIcon />
-            </IconButton>
-          </Box>
-          
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button 
-              size="small" 
-              startIcon={<MarkReadIcon />}
-              onClick={markAllAsRead}
-              disabled={unreadCount === 0}
-            >
-              Đánh dấu đã đọc
-            </Button>
-            <Button 
-              size="small" 
-              startIcon={<DeleteIcon />}
-              onClick={clearAllNotifications}
-              disabled={notifications.length === 0}
-              color="error"
-            >
-              Xóa tất cả
-            </Button>
-          </Box>
-        </Box>
-
-        <List sx={{ flex: 1, overflow: 'auto' }}>
-          {notifications.length === 0 ? (
-            <ListItem>
-              <ListItemText 
-                primary="Không có thông báo nào"
-                secondary="Bạn sẽ nhận được thông báo ở đây"
-                sx={{ textAlign: 'center' }}
-              />
-            </ListItem>
-          ) : (
-            notifications.map((notif, index) => (
-              <React.Fragment key={notif.id}>
-                <ListItem
-                  sx={{
-                    bgcolor: notif.read ? 'transparent' : 'action.hover',
-                    '&:hover': { bgcolor: 'action.selected' }
-                  }}
-                >
-                  <ListItemIcon>
-                    <Avatar 
-                      sx={{ 
-                        width: 32, 
-                        height: 32,
-                        bgcolor: `${getSeverityColor(notif.severity)}.main`,
-                        color: 'white'
-                      }}
-                    >
-                      {getIcon(notif.severity)}
-                    </Avatar>
-                  </ListItemIcon>
-                  
-                  <ListItemText
-                    primary={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Typography 
-                          variant="body2" 
-                          sx={{ 
-                            fontWeight: notif.read ? 'normal' : 'bold',
-                            flex: 1
-                          }}
-                        >
-                          {notif.message}
-                        </Typography>
-                        {!notif.read && (
-                          <Chip 
-                            size="small" 
-                            label="Mới" 
-                            color="primary" 
-                            sx={{ fontSize: '0.7rem', height: 20 }}
-                          />
-                        )}
-                      </Box>
-                    }
-                    secondary={
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 0.5 }}>
-                        <Typography variant="caption" color="text.secondary">
-                          {new Date(notif.timestamp).toLocaleString('vi-VN')}
-                        </Typography>
-                        <Box>
-                          {!notif.read && (
-                            <IconButton 
-                              size="small" 
-                              onClick={() => markAsRead(notif.id)}
-                              title="Đánh dấu đã đọc"
-                            >
-                              <MarkReadIcon fontSize="small" />
-                            </IconButton>
-                          )}
-                          <IconButton 
-                            size="small" 
-                            onClick={() => deleteNotification(notif.id)}
-                            title="Xóa thông báo"
-                          >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                        </Box>
-                      </Box>
-                    }
-                  />
-                </ListItem>
-                {index < notifications.length - 1 && <Divider />}
-              </React.Fragment>
-            ))
-          )}
-        </List>
-      </Drawer>
     </NotificationContext.Provider>
   );
 };

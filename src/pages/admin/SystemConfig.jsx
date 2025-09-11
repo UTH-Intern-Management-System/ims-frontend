@@ -16,7 +16,6 @@ import {
   CardContent,
   Divider,
   Alert,
-  Snackbar,
   Accordion,
   AccordionSummary,
   AccordionDetails,
@@ -48,12 +47,17 @@ import {
   Info as InfoIcon
 } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
+import { useThemeContext } from '../../context/ThemeContext';
+import { useNotification } from '../../context/NotificationContext';
 
 const SystemConfig = () => {
   const { user } = useAuth();
+  const { mode, setThemeMode } = useThemeContext();
+  const { showSuccess, showError, showInfo } = useNotification();
+  
   const [config, setConfig] = useState({
     // General Settings
-    theme: 'light',
+    theme: mode || 'light',
     language: 'vi',
     timezone: 'Asia/Ho_Chi_Minh',
     dateFormat: 'DD/MM/YYYY',
@@ -97,7 +101,6 @@ const SystemConfig = () => {
     notificationFrequency: 'realtime'
   });
 
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [loading, setLoading] = useState(false);
   const [systemStatus, setSystemStatus] = useState({
     database: 'healthy',
@@ -108,7 +111,9 @@ const SystemConfig = () => {
 
   useEffect(() => {
     loadSystemStatus();
-  }, []);
+    // Sync theme with current mode
+    setConfig(prev => ({ ...prev, theme: mode }));
+  }, [mode]);
 
   const loadSystemStatus = async () => {
     // Simulate loading system status
@@ -134,6 +139,12 @@ const SystemConfig = () => {
         ...prev,
         [field]: value
       }));
+      
+      // Handle theme change immediately
+      if (field === 'theme') {
+        setThemeMode(value);
+        showSuccess(`Đã chuyển sang giao diện ${value === 'light' ? 'sáng' : value === 'dark' ? 'tối' : 'tự động'}!`);
+      }
     }
   };
 
@@ -142,9 +153,9 @@ const SystemConfig = () => {
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
-      showSnackbar('Cấu hình đã được lưu thành công!', 'success');
+      showSuccess('Cấu hình đã được lưu thành công!');
     } catch (error) {
-      showSnackbar('Lỗi khi lưu cấu hình!', 'error');
+      showError('Lỗi khi lưu cấu hình!');
     } finally {
       setLoading(false);
     }
@@ -153,12 +164,10 @@ const SystemConfig = () => {
   const handleResetConfig = () => {
     if (window.confirm('Bạn có chắc muốn đặt lại cấu hình về mặc định?')) {
       // Reset to default values
-      showSnackbar('Cấu hình đã được đặt lại!', 'info');
+      setConfig(prev => ({ ...prev, theme: 'light' }));
+      setThemeMode('light');
+      showInfo('Cấu hình đã được đặt lại!');
     }
-  };
-
-  const showSnackbar = (message, severity) => {
-    setSnackbar({ open: true, message, severity });
   };
 
   const getStatusColor = (status) => {
@@ -197,7 +206,7 @@ const SystemConfig = () => {
           <Button
             variant="outlined"
             startIcon={<BackupIcon />}
-            onClick={() => showSnackbar('Tính năng backup sẽ được tích hợp sau!', 'info')}
+            onClick={() => showInfo('Tính năng backup sẽ được tích hợp sau!')}
           >
             Backup
           </Button>
@@ -625,17 +634,6 @@ const SystemConfig = () => {
           {loading ? 'Đang lưu...' : 'Lưu cấu hình'}
         </Button>
       </Box>
-
-      {/* Snackbar */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-      >
-        <Alert severity={snackbar.severity} onClose={() => setSnackbar({ ...snackbar, open: false })}>
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
     </Box>
   );
 };

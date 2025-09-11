@@ -12,6 +12,8 @@ import {
   CircularProgress,
   Divider
 } from '@mui/material';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { CssBaseline } from '@mui/material';
 import { 
   Email, 
   Lock, 
@@ -22,6 +24,37 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+
+// Fixed light theme for login page
+const loginTheme = createTheme({
+  palette: {
+    mode: 'light',
+    primary: {
+      main: '#1976d2',
+      light: '#42a5f5',
+      dark: '#1565c0',
+    },
+    secondary: {
+      main: '#dc004e',
+      light: '#ff5983',
+      dark: '#9a0036',
+    },
+    background: {
+      default: '#fafafa',
+      paper: '#ffffff',
+    },
+    text: {
+      primary: '#212121',
+      secondary: '#757575',
+    },
+  },
+  typography: {
+    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+  },
+  shape: {
+    borderRadius: 8,
+  },
+});
 
 const Login = () => {
   const { login } = useAuth();
@@ -79,149 +112,152 @@ const Login = () => {
   };
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        py: 4
-      }}
-    >
-      <Container maxWidth="sm">
-        <Paper
-          elevation={24}
-          sx={{
-            p: 4,
-            borderRadius: 3,
-            background: 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255, 255, 255, 0.2)'
-          }}
-        >
-          {/* Header */}
-          <Box sx={{ textAlign: 'center', mb: 4 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-              <Business sx={{ fontSize: 40, color: 'primary.main', mr: 1 }} />
-              <School sx={{ fontSize: 40, color: 'secondary.main' }} />
+    <ThemeProvider theme={loginTheme}>
+      <CssBaseline />
+      <Box
+        sx={{
+          minHeight: '100vh',
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          py: 4
+        }}
+      >
+        <Container maxWidth="sm">
+          <Paper
+            elevation={24}
+            sx={{
+              p: 4,
+              borderRadius: 3,
+              background: 'rgba(255, 255, 255, 0.95)',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)'
+            }}
+          >
+            {/* Header */}
+            <Box sx={{ textAlign: 'center', mb: 4 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+                <Business sx={{ fontSize: 40, color: 'primary.main', mr: 1 }} />
+                <School sx={{ fontSize: 40, color: 'secondary.main' }} />
+              </Box>
+              <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold', color: 'text.primary' }}>
+                IMS Platform
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                Hệ thống quản lý thực tập sinh
+              </Typography>
             </Box>
-            <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold', color: 'text.primary' }}>
-              IMS Platform
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              Hệ thống quản lý thực tập sinh
-            </Typography>
-          </Box>
 
-          <Divider sx={{ mb: 3 }} />
+            <Divider sx={{ mb: 3 }} />
 
-          {/* Error Alert */}
-          {error && (
-            <Alert severity="error" sx={{ mb: 3 }}>
-              {error}
-            </Alert>
-          )}
+            {/* Error Alert */}
+            {error && (
+              <Alert severity="error" sx={{ mb: 3 }}>
+                {error}
+              </Alert>
+            )}
 
-          {/* Login Form */}
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-            <TextField
-              name="email"
-              label="Email"
-              type="email"
-              fullWidth
-              margin="normal"
-              required
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Email color="action" />
-                  </InputAdornment>
-                ),
-              }}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2,
-                  '&:hover fieldset': {
-                    borderColor: 'primary.main',
+            {/* Login Form */}
+            <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+              <TextField
+                name="email"
+                label="Email"
+                type="email"
+                fullWidth
+                margin="normal"
+                required
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Email color="action" />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                    '&:hover fieldset': {
+                      borderColor: 'primary.main',
+                    },
                   },
-                },
-              }}
-            />
-            
-            <TextField
-              name="password"
-              label="Mật khẩu"
-              type={showPassword ? 'text' : 'password'}
-              fullWidth
-              margin="normal"
-              required
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Lock color="action" />
-                  </InputAdornment>
-                ),
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      onClick={handleTogglePasswordVisibility}
-                      edge="end"
-                    >
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2,
-                  '&:hover fieldset': {
-                    borderColor: 'primary.main',
+                }}
+              />
+              
+              <TextField
+                name="password"
+                label="Mật khẩu"
+                type={showPassword ? 'text' : 'password'}
+                fullWidth
+                margin="normal"
+                required
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Lock color="action" />
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={handleTogglePasswordVisibility}
+                        edge="end"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                    '&:hover fieldset': {
+                      borderColor: 'primary.main',
+                    },
                   },
-                },
-              }}
-            />
+                }}
+              />
 
-            <Button
-              type="submit"
-              variant="contained"
-              fullWidth
-              size="large"
-              disabled={loading}
-              sx={{
-                mt: 3,
-                mb: 2,
-                py: 1.5,
-                borderRadius: 2,
-                fontSize: '1.1rem',
-                fontWeight: 'bold',
-                background: 'linear-gradient(45deg, #667eea 30%, #764ba2 90%)',
-                '&:hover': {
-                  background: 'linear-gradient(45deg, #5a6fd8 30%, #6a4190 90%)',
-                  transform: 'translateY(-2px)',
-                  boxShadow: '0 8px 25px rgba(102, 126, 234, 0.4)',
-                },
-                transition: 'all 0.3s ease',
-              }}
-            >
-              {loading ? (
-                <CircularProgress size={24} color="inherit" />
-              ) : (
-                'Đăng nhập'
-              )}
-            </Button>
-          </Box>
+              <Button
+                type="submit"
+                variant="contained"
+                fullWidth
+                size="large"
+                disabled={loading}
+                sx={{
+                  mt: 3,
+                  mb: 2,
+                  py: 1.5,
+                  borderRadius: 2,
+                  fontSize: '1.1rem',
+                  fontWeight: 'bold',
+                  background: 'linear-gradient(45deg, #667eea 30%, #764ba2 90%)',
+                  '&:hover': {
+                    background: 'linear-gradient(45deg, #5a6fd8 30%, #6a4190 90%)',
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 8px 25px rgba(102, 126, 234, 0.4)',
+                  },
+                  transition: 'all 0.3s ease',
+                }}
+              >
+                {loading ? (
+                  <CircularProgress size={24} color="inherit" />
+                ) : (
+                  'Đăng nhập'
+                )}
+              </Button>
+            </Box>
 
-          {/* Footer */}
-          <Box sx={{ textAlign: 'center', mt: 3 }}>
-            <Typography variant="body2" color="text.secondary">
-              © 2024 IMS Platform. Tất cả quyền được bảo lưu.
-            </Typography>
-          </Box>
-        </Paper>
-      </Container>
-    </Box>
+            {/* Footer */}
+            <Box sx={{ textAlign: 'center', mt: 3 }}>
+              <Typography variant="body2" color="text.secondary">
+                2024 IMS Platform. Tất cả quyền được bảo lưu.
+              </Typography>
+            </Box>
+          </Paper>
+        </Container>
+      </Box>
+    </ThemeProvider>
   );
 };
 
