@@ -71,86 +71,11 @@ import {
   Assessment
 } from '@mui/icons-material';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid } from 'recharts';
+import assessmentService from '../../services/assessmentService';
 
 const SkillAssessment = () => {
-  const [interns, setInterns] = useState([
-    {
-      id: 1,
-      name: 'Nguyễn Văn A',
-      avatar: 'NA',
-      department: 'Engineering',
-      skills: [
-        {
-          id: 1,
-          name: 'ReactJS',
-          category: 'Frontend',
-          currentLevel: 4,
-          previousLevel: 3,
-          targetLevel: 5,
-          progress: 80,
-          assessment: {
-            technical: 4,
-            problemSolving: 4,
-            communication: 3,
-            teamwork: 4,
-            learning: 5
-          },
-          feedback: 'Excellent progress in React Hooks. Needs more practice with state management.',
-          goals: 'Master advanced patterns by next month',
-          lastAssessment: '2024-01-15',
-          nextAssessment: '2024-02-15'
-        },
-        {
-          id: 2,
-          name: 'JavaScript',
-          category: 'Programming',
-          currentLevel: 4.5,
-          previousLevel: 4,
-          targetLevel: 5,
-          progress: 90,
-          assessment: {
-            technical: 4.5,
-            problemSolving: 5,
-            communication: 4,
-            teamwork: 4,
-            learning: 5
-          },
-          feedback: 'Strong fundamentals. Ready for advanced concepts.',
-          goals: 'Expert level by end of internship',
-          lastAssessment: '2024-01-15',
-          nextAssessment: '2024-02-15'
-        }
-      ]
-    },
-    {
-      id: 2,
-      name: 'Trần Thị B',
-      avatar: 'TB',
-      department: 'Marketing',
-      skills: [
-        {
-          id: 3,
-          name: 'Digital Marketing',
-          category: 'Marketing',
-          currentLevel: 3.5,
-          previousLevel: 3,
-          targetLevel: 4,
-          progress: 70,
-          assessment: {
-            technical: 3.5,
-            problemSolving: 3,
-            communication: 4.5,
-            teamwork: 4,
-            learning: 4
-          },
-          feedback: 'Great communication skills. Needs more analytical thinking.',
-          goals: 'Improve data analysis skills',
-          lastAssessment: '2024-01-10',
-          nextAssessment: '2024-02-10'
-        }
-      ]
-    }
-  ]);
+  const [interns, setInterns] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const [selectedIntern, setSelectedIntern] = useState(null);
   const [selectedSkill, setSelectedSkill] = useState(null);
@@ -177,6 +102,117 @@ const SkillAssessment = () => {
     { key: 'learning', label: 'Học tập', description: 'Khả năng tiếp thu kiến thức mới' }
   ];
 
+  // Load data from backend
+  useEffect(() => {
+    loadAssessments();
+  }, []);
+
+  const loadAssessments = async () => {
+    try {
+      setLoading(true);
+      const response = await assessmentService.getAllAssessments();
+      const assessments = response.data;
+      
+      // Transform backend data to frontend format
+      const transformedInterns = transformAssessmentsToInterns(assessments);
+      setInterns(transformedInterns);
+    } catch (error) {
+      console.error('Error loading assessments:', error);
+      // Fallback to mock data
+      setInterns([
+        {
+          id: 1,
+          name: 'Nguyễn Văn A',
+          avatar: 'NA',
+          department: 'Engineering',
+          skills: [
+            {
+              id: 1,
+              name: 'ReactJS',
+              category: 'Frontend',
+              currentLevel: 4,
+              previousLevel: 3,
+              targetLevel: 5,
+              progress: 80,
+              assessment: {
+                technical: 4,
+                problemSolving: 4,
+                communication: 3,
+                teamwork: 4,
+                learning: 5
+              },
+              feedback: 'Excellent progress in React Hooks. Needs more practice with state management.',
+              goals: 'Master advanced patterns by next month',
+              lastAssessment: '2024-01-15',
+              nextAssessment: '2024-02-15'
+            }
+          ]
+        }
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const transformAssessmentsToInterns = (assessments) => {
+    const internMap = new Map();
+    
+    assessments.forEach(assessment => {
+      const internId = assessment.internId;
+      
+      if (!internMap.has(internId)) {
+        internMap.set(internId, {
+          id: internId,
+          name: `Intern ${internId}`,
+          avatar: `I${internId}`,
+          department: 'Engineering',
+          skills: []
+        });
+      }
+      
+      const intern = internMap.get(internId);
+      // Xử lý null values cho các scores
+      const technicalScore = assessment.technicalScore || 0;
+      const problemSolvingScore = assessment.problemSolvingScore || 0;
+      const communicationScore = assessment.communicationScore || 0;
+      const teamworkScore = assessment.teamworkScore || 0;
+      const learningScore = assessment.learningScore || 0;
+      
+      // Tính average score, nếu tất cả đều 0 thì dùng score cũ
+      const hasDetailedScores = technicalScore > 0 || problemSolvingScore > 0 || 
+                               communicationScore > 0 || teamworkScore > 0 || learningScore > 0;
+      
+      const averageScore = hasDetailedScores ? 
+        (technicalScore + problemSolvingScore + communicationScore + teamworkScore + learningScore) / 5 :
+        assessment.score || 3;
+      
+      const skill = {
+        id: assessment.id,
+        name: assessment.kpi?.name || 'Skill Assessment',
+        category: 'Assessment',
+        currentLevel: Math.round(averageScore),
+        previousLevel: 3,
+        targetLevel: 5,
+        progress: Math.round((averageScore / 5) * 100),
+        assessment: {
+          technical: technicalScore || 3,
+          problemSolving: problemSolvingScore || 3,
+          communication: communicationScore || 3,
+          teamwork: teamworkScore || 3,
+          learning: learningScore || 3
+        },
+        feedback: assessment.feedback || assessment.comment || 'No feedback available',
+        goals: assessment.goals || 'Continue improving',
+        lastAssessment: assessment.assessedAt ? assessment.assessedAt.split('T')[0] : '2024-01-15',
+        nextAssessment: '2024-02-15'
+      };
+      
+      intern.skills.push(skill);
+    });
+    
+    return Array.from(internMap.values());
+  };
+
   const handleOpenAssessment = (intern, skill) => {
     setSelectedIntern(intern);
     setSelectedSkill(skill);
@@ -199,48 +235,70 @@ const SkillAssessment = () => {
     setOpenFeedbackDialog(true);
   };
 
-  const handleSaveAssessment = () => {
+  const handleSaveAssessment = async () => {
     if (!selectedIntern || !selectedSkill) return;
 
-    const updatedInterns = interns.map(intern => {
-      if (intern.id === selectedIntern.id) {
-        const updatedSkills = intern.skills.map(skill => {
-          if (skill.id === selectedSkill.id) {
-            const newLevel = Math.round(
-              (assessmentData.technical + assessmentData.problemSolving + 
-               assessmentData.communication + assessmentData.teamwork + 
-               assessmentData.learning) / 5
-            );
-            
-            return {
-              ...skill,
-              previousLevel: skill.currentLevel,
-              currentLevel: newLevel,
-              progress: Math.round((newLevel / skill.targetLevel) * 100),
-              assessment: {
-                technical: assessmentData.technical,
-                problemSolving: assessmentData.problemSolving,
-                communication: assessmentData.communication,
-                teamwork: assessmentData.teamwork,
-                learning: assessmentData.learning
-              },
-              feedback: assessmentData.feedback,
-              goals: assessmentData.goals,
-              lastAssessment: new Date().toISOString().split('T')[0],
-              nextAssessment: assessmentData.nextAssessment
-            };
-          }
-          return skill;
-        });
+    try {
+      // Gửi assessment lên backend
+      const assessmentDataToSend = {
+        internId: selectedIntern.id,
+        skillName: selectedSkill.name,
+        technicalScore: assessmentData.technical,
+        problemSolvingScore: assessmentData.problemSolving,
+        communicationScore: assessmentData.communication,
+        teamworkScore: assessmentData.teamwork,
+        learningScore: assessmentData.learning,
+        feedback: assessmentData.feedback,
+        goals: assessmentData.goals,
+        assessedAt: new Date().toISOString()
+      };
 
-        return { ...intern, skills: updatedSkills };
-      }
-      return intern;
-    });
+      await assessmentService.createAssessment(assessmentDataToSend);
 
-    setInterns(updatedInterns);
-    setOpenAssessmentDialog(false);
-    showSnackbar('Đánh giá đã được lưu thành công', 'success');
+      // Cập nhật UI local
+      const updatedInterns = interns.map(intern => {
+        if (intern.id === selectedIntern.id) {
+          const updatedSkills = intern.skills.map(skill => {
+            if (skill.id === selectedSkill.id) {
+              const newLevel = Math.round(
+                (assessmentData.technical + assessmentData.problemSolving + 
+                 assessmentData.communication + assessmentData.teamwork + 
+                 assessmentData.learning) / 5
+              );
+              
+              return {
+                ...skill,
+                previousLevel: skill.currentLevel,
+                currentLevel: newLevel,
+                progress: Math.round((newLevel / skill.targetLevel) * 100),
+                assessment: {
+                  technical: assessmentData.technical,
+                  problemSolving: assessmentData.problemSolving,
+                  communication: assessmentData.communication,
+                  teamwork: assessmentData.teamwork,
+                  learning: assessmentData.learning
+                },
+                feedback: assessmentData.feedback,
+                goals: assessmentData.goals,
+                lastAssessment: new Date().toISOString().split('T')[0],
+                nextAssessment: assessmentData.nextAssessment
+              };
+            }
+            return skill;
+          });
+
+          return { ...intern, skills: updatedSkills };
+        }
+        return intern;
+      });
+
+      setInterns(updatedInterns);
+      setOpenAssessmentDialog(false);
+      showSnackbar('Đánh giá đã được lưu thành công vào database!', 'success');
+    } catch (error) {
+      console.error('Error saving assessment:', error);
+      showSnackbar('Lỗi khi lưu đánh giá: ' + error.message, 'error');
+    }
   };
 
   const showSnackbar = (message, severity) => {
